@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Vocabulary trainer for the Italian driving theory exam (esame di teoria, patente B). 30-question sessions, English to Italian and Italian to English.">
+<meta name="theme-color" content="#0f1720">
+<title>Patente Vocab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128663;</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="#" data-nav="setup">
+    <span class="brand-mark" aria-hidden="true">
+      <span class="flag-g"></span><span class="flag-w"></span><span class="flag-r"></span>
+    </span>
+    <span class="brand-text">Patente<span class="brand-thin">Vocab</span></span>
+  </a>
+  <div class="topbar-right">
+    <div class="streak" id="streak-chip" hidden>
+      <span class="streak-flame" aria-hidden="true">&#128293;</span>
+      <span id="streak-count">0</span>
+    </div>
+    <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="sun" d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66l1.41-1.41M4.93 19.07l1.41-1.41m0-11.32L4.93 4.93m14.14 14.14l-1.41-1.41M16 12a4 4 0 11-8 0 4 4 0 018 0z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- ============ SETUP ============ -->
+  <section class="screen is-active" id="screen-setup">
+    <div class="hero">
+      <p class="eyebrow">Esame di teoria &middot; Patente B</p>
+      <h1>Learn the words that<br>decide the answer.</h1>
+      <p class="lede">The Italian theory exam is 30 true/false statements in 20 minutes, and you may miss at most 3. Most of what trips up a non-native speaker isn&rsquo;t the road rules &mdash; it&rsquo;s one verb, one preposition, one <em>salvo che</em>. This drills exactly those.</p>
+    </div>
+
+    <div class="stats-strip" id="stats-strip">
+      <div class="stat"><span class="stat-num" id="stat-known">0</span><span class="stat-label">words solid</span></div>
+      <div class="stat"><span class="stat-num" id="stat-shaky">0</span><span class="stat-label">shaky</span></div>
+      <div class="stat"><span class="stat-num" id="stat-unseen">0</span><span class="stat-label">not yet seen</span></div>
+      <div class="stat"><span class="stat-num" id="stat-sessions">0</span><span class="stat-label">sessions done</span></div>
+    </div>
+
+    <div class="mastery-bar" id="mastery-wrap">
+      <div class="mastery-track">
+        <span class="mastery-fill" id="mastery-fill" style="width:0%"></span>
+      </div>
+      <p class="mastery-caption"><span id="mastery-pct">0%</span> of the deck answered correctly at least twice in a row</p>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">Session type</h2>
+      <div class="chip-row" role="radiogroup" aria-label="Session type" id="mode-row">
+        <button class="chip" role="radio" aria-checked="true"  data-mode="it-en">Italian &rarr; English</button>
+        <button class="chip" role="radio" aria-checked="false" data-mode="en-it">English &rarr; Italian</button>
+        <button class="chip" role="radio" aria-checked="false" data-mode="mixed">Mixed both ways</button>
+        <button class="chip" role="radio" aria-checked="false" data-mode="cloze">Fill the sentence</button>
+      </div>
+      <p class="hint" id="mode-hint">Read the Italian, pick the English. The direction you need for the exam itself.</p>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">Topics <span class="panel-note" id="pool-count"></span></h2>
+      <div class="chip-row" id="cat-row"></div>
+    </div>
+
+    <div class="panel panel-tight">
+      <h2 class="panel-title">Focus</h2>
+      <div class="chip-row" role="radiogroup" aria-label="Focus" id="focus-row">
+        <button class="chip" role="radio" aria-checked="true"  data-focus="smart">Smart mix</button>
+        <button class="chip" role="radio" aria-checked="false" data-focus="weak">My weak words</button>
+        <button class="chip" role="radio" aria-checked="false" data-focus="new">Only new</button>
+        <button class="chip" role="radio" aria-checked="false" data-focus="hard">Hardest only</button>
+      </div>
+      <p class="hint" id="focus-hint">Weights the 30 toward what you&rsquo;ve missed, what you&rsquo;ve never seen, and the highest-frequency exam words.</p>
+    </div>
+
+    <div class="start-row">
+      <button class="btn btn-primary btn-lg" id="btn-start">
+        Start 30 questions
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14m-6-6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <label class="len-select">
+        <span>Length</span>
+        <select id="session-len">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="30" selected>30 (exam length)</option>
+          <option value="50">50</option>
+        </select>
+      </label>
+    </div>
+    <p class="start-note" id="start-note"></p>
+
+    <details class="browse">
+      <summary>Browse the whole word list</summary>
+      <div class="browse-tools">
+        <input type="search" id="browse-search" placeholder="Search Italian or English&hellip;" aria-label="Search the word list">
+      </div>
+      <div id="browse-list" class="browse-list"></div>
+    </details>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section class="screen" id="screen-quiz">
+    <div class="quiz-head">
+      <button class="icon-btn ghost" id="btn-quit" type="button" aria-label="End session">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="progress">
+        <div class="progress-track"><span class="progress-fill" id="progress-fill"></span></div>
+      </div>
+      <div class="qcount"><span id="q-index">1</span><span class="qcount-sep">/</span><span id="q-total">30</span></div>
+    </div>
+
+    <div class="scoreline">
+      <span class="tally tally-right"><span id="tally-correct">0</span> correct</span>
+      <span class="tally tally-wrong"><span id="tally-wrong">0</span> missed</span>
+      <span class="tally tally-budget" id="budget-chip">3 misses allowed at the real exam</span>
+    </div>
+
+    <div class="card" id="qcard">
+      <p class="card-kicker" id="card-kicker">Italian &rarr; English</p>
+      <p class="prompt" id="prompt"></p>
+      <p class="prompt-sub" id="prompt-sub"></p>
+    </div>
+
+    <div class="options" id="options"></div>
+
+    <div class="feedback" id="feedback" hidden>
+      <p class="fb-verdict" id="fb-verdict"></p>
+      <p class="fb-answer" id="fb-answer"></p>
+      <p class="fb-note" id="fb-note"></p>
+      <p class="fb-ex" id="fb-ex"></p>
+    </div>
+
+    <div class="quiz-foot">
+      <button class="btn btn-primary" id="btn-next" hidden>Next <span class="kbd">&crarr;</span></button>
+      <p class="kbd-hint">Press <span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span><span class="kbd">4</span> to answer</p>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section class="screen" id="screen-results">
+    <div class="result-hero">
+      <div class="ring" id="ring">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+          <circle class="ring-fg" cx="60" cy="60" r="52" id="ring-fg"></circle>
+        </svg>
+        <div class="ring-label"><span id="res-pct">0</span><span class="ring-pct">%</span></div>
+      </div>
+      <h2 id="res-title">Session complete</h2>
+      <p class="res-sub" id="res-sub"></p>
+      <p class="verdict-line" id="verdict-line"></p>
+    </div>
+
+    <div id="missed-wrap" class="missed-wrap" hidden>
+      <h3 class="panel-title">Worth another look <span class="panel-note" id="missed-count"></span></h3>
+      <div id="missed-list" class="missed-list"></div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-primary" id="btn-again">Another 30</button>
+      <button class="btn btn-secondary" id="btn-retry-missed" hidden>Drill what I missed</button>
+      <button class="btn btn-ghost" id="btn-home">Back to start</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>Built for the <strong>esame di teoria, patente B</strong>. Vocabulary drawn from the wording of the ministerial question bank. Progress is saved in this browser only &mdash; nothing leaves your device.</p>
+  <p class="footer-meta"><span id="deck-size"></span> &middot; <button class="linkbtn" id="btn-reset">Reset my progress</button></p>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/quiz.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
